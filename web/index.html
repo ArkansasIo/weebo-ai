@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Weebo AI</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:#071019;color:#e9f2f8}
+header{padding:16px 22px;border-bottom:1px solid #203340;display:flex;justify-content:space-between;align-items:center}
+main{max-width:1000px;margin:auto;padding:24px}
+#chat{min-height:55vh;max-height:70vh;overflow:auto;border:1px solid #203340;border-radius:14px;padding:18px;background:#0b1620}
+.msg{padding:12px 14px;margin:10px 0;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.user{background:#153047}.assistant{background:#10251d}
+form{display:flex;gap:10px;margin-top:15px}
+input{flex:1;min-width:0;padding:14px;border-radius:10px;border:1px solid #314856;background:#0a141c;color:white}
+button{padding:14px 20px;border:0;border-radius:10px;cursor:pointer;background:#a4e4ff;color:#071019;font-weight:700}
+small{color:#9db4c2}
+</style>
+</head>
+<body>
+<header><strong>WEEBO AI</strong><span id="status">Checking Ollama…</span></header>
+<main><p><small>Local AI powered by Ollama. Conversations are saved in local SQLite.</small></p>
+<div id="chat" aria-live="polite"></div>
+<form id="form"><input id="input" placeholder="Talk to Weebo AI…" autocomplete="off" required><button id="send">Send</button></form>
+</main>
+<script>
+const chat=document.querySelector("#chat"),input=document.querySelector("#input"),form=document.querySelector("#form");
+function add(role,text){const d=document.createElement("div");d.className="msg "+role;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;return d}
+async function health(){try{const r=await fetch("/health"),x=await r.json();document.querySelector("#status").textContent=x.ollama.connected?"● Ollama connected":"○ Ollama offline"}catch{document.querySelector("#status").textContent="API offline"}}
+form.addEventListener("submit",async e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value="";add("user",text);const pending=add("assistant","Weebo is thinking…");document.querySelector("#send").disabled=true;try{const r=await fetch("/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:text}]})});const x=await r.json();pending.textContent=x.choices?.[0]?.message?.content||x.error?.message||"No response returned."}catch(err){pending.textContent="Connection error: "+err}finally{document.querySelector("#send").disabled=false;input.focus()}});
+health();
+</script>
+</body></html>
