@@ -27,10 +27,7 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("weebo_ai=info,tower_http=info")
-        .init();
-
+    tracing_subscriber::fmt().with_env_filter("weebo_ai=info,tower_http=info").init();
     let config = Config::from_env()?;
     let memory = MemoryStore::connect(&config.database_url).await?;
     memory.migrate().await?;
@@ -42,7 +39,6 @@ async fn main() -> Result<()> {
         config: config.clone(),
         memory,
     };
-
     let app = Router::new()
         .route("/", get(index))
         .route("/health", get(health))
