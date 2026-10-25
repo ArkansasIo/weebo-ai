@@ -1,3 +1,4 @@
+mod agent;
 mod api;
 mod config;
 mod memory;
@@ -23,6 +24,7 @@ pub struct AppState {
     pub memory: MemoryStore,
     pub ollama: OllamaProvider,
     pub tools: ToolRegistry,
+    pub agent: agent::Agent,
 }
 
 #[tokio::main]
@@ -36,6 +38,7 @@ async fn main() -> Result<()> {
     let state = AppState {
         ollama: OllamaProvider::new(config.ollama_base_url.clone(), config.ollama_model.clone()),
         tools: ToolRegistry::new(config.clone()),
+        agent: agent::Agent::weebo(),
         config: config.clone(),
         memory,
     };
